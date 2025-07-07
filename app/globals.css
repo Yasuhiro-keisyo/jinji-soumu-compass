@@ -1,0 +1,84 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Brand Colors */
+  --color-primary: #2c3e50; /* Deep, trustworthy blue */
+  --color-accent: #3498db;  /* Brighter, action-oriented blue */
+
+  /* Neutral Palette */
+  --color-text-dark: #34495e;
+  --color-text-medium: #7f8c8d;
+  --color-border: #ecf0f1;
+  --color-background: #ffffff;
+
+  /* State Colors */
+  --color-success: #2ecc71;
+  --color-error: #e74c3c;
+
+  /* Typography */
+  --font-family-sans: var(--font-noto-sans-jp), sans-serif;
+  --font-size-base: 16px;
+
+  /* Layout & Spacing */
+  --container-max-width: 1200px;
+  --spacing-unit: 1rem;
+}
+
+@layer base {
+  html {
+    font-family: var(--font-family-sans);
+    font-size: var(--font-size-base);
+    background-color: var(--color-background);
+    color: var(--color-text-dark);
+  }
+
+  body {
+    @apply min-h-screen flex flex-col;
+  }
+
+  /* Responsive & Accessible Typography */
+  h1, .h1 {
+    font-size: clamp(2.5rem, 1.75rem + 3.75vw, 4.5rem);
+    @apply font-bold leading-tight;
+  }
+  h2, .h2 {
+    font-size: clamp(2rem, 1.5rem + 2.5vw, 3.5rem);
+    @apply font-bold leading-tight;
+  }
+  h3, .h3 {
+    font-size: clamp(1.5rem, 1.25rem + 1.25vw, 2.5rem);
+    @apply font-bold leading-tight;
+  }
+  h4, .h4 {
+    font-size: clamp(1.2rem, 1.1rem + 0.5vw, 1.5rem);
+    @apply font-bold leading-tight;
+  }
+  p, .p {
+    @apply text-base leading-relaxed;
+  }
+
+  /* Accessibility: Focus Indicator */
+  :focus-visible {
+    outline: 3px solid var(--color-accent);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+}
+
+@layer components {
+  .container {
+    @apply max-w-[var(--container-max-width)] mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  .btn {
+    @apply inline-block px-6 py-3 rounded-md font-bold text-white transition-colors duration-300;
+  }
+  .btn-primary {
+    @apply bg-primary hover:bg-opacity-90;
+  }
+  .btn-accent {
+    @apply bg-accent hover:bg-opacity-90;
+  }
+}
