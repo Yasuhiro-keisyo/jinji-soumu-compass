@@ -1,20 +1,23 @@
-import type { PortableTextBlock } from 'sanity'
 import type { Metadata } from 'next'
-import Image from 'next/image'
-import { PortableText } from '@portabletext/react'
-import { client, urlFor } from '@/lib/sanity'
 import type { SanityImageSource } from '@sanity/image-url/lib/types/types'
+import type { PortableTextBlock } from 'sanity'
+import Image from 'next/image'
+import Link from 'next/link'
+import { PortableText } from '@portabletext/react'
 import { Light as SyntaxHighlighter } from 'react-syntax-highlighter'
 import { atomOneDark } from 'react-syntax-highlighter/dist/cjs/styles/hljs'
 
-// ★★★ 型定義を一つにまとめる ★★★
+import { client, urlFor } from '@/lib/sanity'
+
+// ★★★ 型定義 ★★★
+// ページコンポーネントが受け取るPropsの型
 interface PageProps {
   params: Promise<{
     slug: string;
   }>;
 }
 
-// データ取得用の型
+// Sanityから取得する投稿データの型
 interface PostData {
   _id: string;
   title: string;
@@ -22,7 +25,7 @@ interface PostData {
   mainImage: SanityImageSource;
   publishedAt: string;
   _updatedAt: string;
-  body: PortableTextBlock[]; // PortableText用の型
+  body: PortableTextBlock[];
   author: {
     name: string;
   };
@@ -45,9 +48,9 @@ async function getPost(slug: string): Promise<PostData | null> {
   return data;
 }
 
-// ★★★ generateMetadata 関数 ★★★
+// ★★★ メタデータ生成関数 ★★★
 export async function generateMetadata({ params: awaitedParams }: PageProps): Promise<Metadata> {
-  const params = await awaitedParams; // ここでもawaitする
+  const params = await awaitedParams;
   const post = await getPost(params.slug);
 
   if (!post) {
@@ -67,16 +70,20 @@ export async function generateMetadata({ params: awaitedParams }: PageProps): Pr
   };
 }
 
-// PortableTextのカスタムコンポーネント
-const components = {
+// ★★★ PortableTextのカスタムコンポーネント定義 ★★★
+const portableTextComponents = {
   types: {
+    // Sanityの本文中のcode型をSyntaxHighlighterで表示
     code: ({ value }: { value: { code: string; language: string } }) => {
       return (
-        <SyntaxHighlighter language={value.language} style={atomOneDark}>
-          {value.code}
-        </SyntaxHighlighter>
+        <div className="my-6 text-sm">
+          <SyntaxHighlighter language={value.language || 'plaintext'} style={atomOneDark} customStyle={{ padding: '1.5em', borderRadius: '0.5em' }}>
+            {value.code}
+          </SyntaxHighlighter>
+        </div>
       );
     },
+    // Sanityの本文中のimage型をNext/Imageで表示
     image: ({ value }: { value: SanityImageSource & { alt?: string } }) => {
       return (
         <div className="my-8 rounded-lg overflow-hidden shadow-lg">
@@ -92,35 +99,41 @@ const components = {
       );
     },
   },
-  block: {
-    h1: ({ children }: { children?: React.ReactNode }) => <h1 className="text-4xl md:text-5xl font-extrabold text-neutral-dark mb-6 mt-10">{children}</h1>,
-    h2: ({ children }: { children?: React.ReactNode }) => <h2 className="text-3xl md:text-4xl font-bold text-neutral-dark mb-5 mt-8">{children}</h2>,
-    h3: ({ children }: { children?: React.ReactNode }) => <h3 className="text-2xl md:text-3xl font-semibold text-neutral-dark mb-4 mt-6">{children}</h3>,
-    h4: ({ children }: { children?: React.ReactNode }) => <h4 className="text-xl md:text-2xl font-medium text-neutral-dark mb-3 mt-5">{children}</h4>,
-    normal: ({ children }: { children?: React.ReactNode }) => <p className="text-lg leading-relaxed mb-4">{children}</p>,
-    blockquote: ({ children }: { children?: React.ReactNode }) => (
-      <blockquote className="border-l-4 border-primary pl-4 py-2 my-6 italic text-neutral-medium">
-        {children}
-      </blockquote>
-    ),
-  },
-  list: {
-    bullet: ({ children }: { children?: React.ReactNode }) => <ul className="list-disc list-inside mb-4 pl-5">{children}</ul>,
-    number: ({ children }: { children?: React.ReactNode }) => <ol className="list-decimal list-inside mb-4 pl-5">{children}</ol>,
-  },
-  listItem: {
-    bullet: ({ children }: { children?: React.ReactNode }) => <li className="mb-2">{children}</li>,
-    number: ({ children }: { children?: React.ReactNode }) => <li className="mb-2">{children}</li>,
-  },
+  marks: {
+    // 本文中のリンクを新しいタブで開き、スタイルを適用
+    link: ({ children, value }: { children?: React.ReactNode; value?: { href?: string } }) => {
+      const href = value?.href || '';
+      const isInternal = href.startsWith('/') || href.startsWith('#');
+      return (
+        <a 
+          href={href} 
+          target={isInternal ? '_self' : '_blank'}
+          rel={isInternal ? undefined : 'noopener noreferrer'}
+          className="text-primary hover:underline decoration-primary/50"
+        >
+          {children}
+        </a>
+      )
+    }
+  }
+  // block, list, listItemのカスタムスタイルは削除。proseに任せる。
 };
 
-// ★★★ ページコンポーネント ★★★
+// ★★★ ページコンポーネント本体 ★★★
 export default async function PostDetailPage({ params: awaitedParams }: PageProps) {
-  const params = await awaitedParams; // ここでもawaitする
+  const params = await awaitedParams;
   const post = await getPost(params.slug);
 
   if (!post) {
-    return <div>記事が見つかりません。</div>;
+    return (
+      <div className="container mx-auto py-12 text-center">
+        <h1>404 - 記事が見つかりません</h1>
+        <p className="mt-4">お探しのページは存在しないか、移動した可能性があります。</p>
+        <Link href="/" className="mt-8 inline-block bg-primary text-white px-6 py-3 rounded-md hover:bg-opacity-90">
+          ホームに戻る
+        </Link>
+      </div>
+    );
   }
 
   const jsonLd = {
@@ -136,35 +149,49 @@ export default async function PostDetailPage({ params: awaitedParams }: PageProp
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <article className="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8 bg-white shadow-lg rounded-lg my-8">
-        <h1 className="text-4xl md:text-5xl font-extrabold text-primary mb-4 leading-tight">
-          {post.title}
-        </h1>
-        <p className="text-md text-neutral-medium mb-6 border-b pb-4 border-neutral-light">
-          公開日: {new Date(post.publishedAt).toLocaleDateString('ja-JP', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-          })}
-          {post.author && <span className="ml-4">著者: {post.author.name}</span>}
-        </p>
-        {post.mainImage && (
-          <div className="relative w-full h-96 my-8 rounded-lg overflow-hidden shadow-xl">
-            <Image
-              src={urlFor(post.mainImage).url()}
-              alt={post.title}
-              fill
-              className="object-cover"
-              sizes="(max-width: 768px) 100vw, 900px"
-              priority
-            />
+      <article className="bg-white py-8 md:py-12">
+        <div className="container">
+          <div className="max-w-4xl mx-auto">
+            {/* 記事ヘッダー */}
+            <header className="mb-8">
+              <h1 className="text-3xl md:text-4xl font-extrabold text-primary leading-tight">
+                {post.title}
+              </h1>
+              <p className="mt-4 text-md text-neutral-medium border-b pb-4 border-neutral-light">
+                公開日: {new Date(post.publishedAt).toLocaleDateString('ja-JP', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                })}
+                {post.author && <span className="ml-4">著者: {post.author.name}</span>}
+              </p>
+            </header>
+
+            {/* メイン画像 */}
+            {post.mainImage && (
+              <div className="relative w-full aspect-video my-8 rounded-lg overflow-hidden shadow-xl">
+                <Image
+                  src={urlFor(post.mainImage).url()}
+                  alt={post.title}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 100vw, 900px"
+                  priority
+                />
+              </div>
+            )}
+            
+            {/* 本文 */}
+            {post.body && (
+              <div className="prose prose-lg max-w-none 
+                              prose-h2:border-b prose-h2:border-primary/30 prose-h2:pb-2 
+                              prose-a:text-primary 
+                              prose-blockquote:border-primary">
+                <PortableText value={post.body} components={portableTextComponents} />
+              </div>
+            )}
           </div>
-        )}
-        {post.body && (
-          <div className="prose prose-lg max-w-none mt-8">
-            <PortableText value={post.body} components={components} />
-          </div>
-        )}
+        </div>
       </article>
     </>
   );

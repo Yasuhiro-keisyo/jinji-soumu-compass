@@ -32,7 +32,7 @@ export default defineType({
     defineField({
       name: 'bio',
       title: 'Bio',
-      type: 'text',
+      type: 'blockContent',
       description: 'プロフィールページに表示される自己紹介文',
     }),
   ],

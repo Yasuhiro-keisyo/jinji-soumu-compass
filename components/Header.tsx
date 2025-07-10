@@ -16,11 +16,7 @@ export default function Header() {
                 ホーム
               </Link>
             </li>
-            <li>
-              <Link href="/profile" className="text-white hover:text-accent transition-colors duration-300">
-                プロフィール
-              </Link>
-            </li>
+            
             {/* 必要に応じて他のリンクを追加 */}
           </ul>
         </nav>
