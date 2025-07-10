@@ -1,6 +1,6 @@
 import Image from 'next/image'
 import { urlFor } from '@/lib/sanity'
-import type { SanityImageSource } from '@sanity/image-url/lib/types/types'
+
 
 // ★★★ Sanityの画像オブジェクトの具体的な型を定義 ★★★
 interface SanityImageValue {
