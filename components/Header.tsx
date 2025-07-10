@@ -2,22 +2,29 @@ import Link from 'next/link'
 
 export default function Header() {
   return (
-    <header className="bg-primary text-white shadow-lg">
-      <div className="container mx-auto px-4 py-6 flex justify-between items-center">
-        <h1 className="text-3xl font-extrabold">
+    <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md shadow-sm">
+      <div className="container mx-auto px-4 py-4 flex justify-between items-center">
+        {/* サイトロゴ・タイトル */}
+        <div className="text-xl font-extrabold text-primary">
           <Link href="/">
             人事総務の羅針盤
           </Link>
-        </h1>
+        </div>
+
+        {/* ナビゲーション */}
         <nav>
-          <ul className="flex space-x-6">
+          <ul className="flex items-center space-x-6 text-md font-medium">
             <li>
-              <Link href="/" className="text-white hover:text-accent transition-colors duration-300">
+              <Link href="/" className="text-neutral-dark hover:text-primary transition-colors">
                 ホーム
               </Link>
             </li>
-            
-            {/* 必要に応じて他のリンクを追加 */}
+            {/* ↓↓↓ これがプロフィールページへのリンクです ↓↓↓ */}
+            <li>
+              <Link href="/profile" className="text-neutral-dark hover:text-primary transition-colors">
+                プロフィール
+              </Link>
+            </li>
           </ul>
         </nav>
       </div>
