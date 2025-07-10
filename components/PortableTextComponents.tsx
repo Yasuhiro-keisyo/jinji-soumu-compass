@@ -1,10 +1,11 @@
+import type { SanityImageSource } from '@sanity/image-url/lib/types/types'
 import Image from 'next/image'
 import { urlFor } from '@/lib/sanity'
 
 export const portableTextComponents = {
   types: {
     // Sanityの本文中に追加した画像を、Next/Imageで最適化して表示する設定
-    image: ({ value }: { value: any }) => {
+    image: ({ value }: { value: SanityImageSource & { alt?: string } }) => {
       if (!value?.asset?._ref) {
         return null
       }
@@ -24,10 +25,10 @@ export const portableTextComponents = {
   },
   marks: {
     // リンクを新しいタブで開く設定
-    link: ({ children, value }: { children: React.ReactNode; value: any }) => {
-      const rel = !value.href.startsWith('/') ? 'noreferrer noopener' : undefined
+    link: ({ children, value }: { children: React.ReactNode; value?: { href?: string } }) => {
+      const rel = !value?.href?.startsWith('/') ? 'noreferrer noopener' : undefined
       return (
-        <a href={value.href} rel={rel} target="_blank" className="text-primary hover:underline">
+        <a href={value?.href} rel={rel} target="_blank" className="text-primary hover:underline">
           {children}
         </a>
       )

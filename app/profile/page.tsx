@@ -1,3 +1,4 @@
+import type { PortableTextBlock } from 'sanity'
 import { client, urlFor } from '@/lib/sanity'
 import type { SanityImageSource } from '@sanity/image-url/lib/types/types'
 import Image from 'next/image'
@@ -7,7 +8,7 @@ import { PortableText } from '@portabletext/react' // 本文表示でおなじ�
 interface AuthorProfile {
   name: string;
   image: SanityImageSource;
-  bio: any; // Portable Textの型。あとで厳密にできます
+  bio: PortableTextBlock[]; // Portable Textの型。あとで厳密にできます
   // 必要であれば、他のフィールド（例: email, websiteなど）も追加
 }
 
